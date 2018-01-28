@@ -1,0 +1,169 @@
+PC-BSDあらためTrueOSのインストール
+===
+
+経緯
+====
+
+Ubuntu環境だったサーバーの設定ファイルをbitbucketにあげようと思ったら余分なファイルを上げそうになったので、
+[source, shell]
+-----
+git reset --hard HEAD^
+-----
+してcommit状況をリセットしようとしたら、もろもろぶっ飛んでしまった。
+ハードリンクで設定ファイルを使うようにしていたので、サーバーの稼働自体が怪しくなってしまった。そのため、再インストールをすることにした。
+
+INPORTANT: *教訓：GITのハードリセットは要注意である*
+
+再インストールもUbuntuにしようかと思ったが、せっかく自分の好きにできるサーバーなのだから、面白そうなOSを使いたくなった。
+そこで、白羽の矢がたったのが「TrueOS」だった。
+
+TrueOSについて
+====
+
+TrueOSはかつてはPC-BSDと呼ばれたユーザフレンドリなBSDのOS。
+BSD系はZFSをFUSEではなく直接扱えるので今回の用途では勝手が良い。
+Dockerもインストールできるようなので、良さそう。
+パッケージシステムは独自なので"ports"ではない。
+"pc-updatemanager"というコマンドを使うらしい。
+↑違うっぽい、パッケージインストールだけど、アップデートはpc-updatemanager使えって言ってるみたい？なんか面倒、というか気持ち悪い
+Free-BSDベースだから更新頻度とか大丈夫そう？
+
+インストール
+====
+
+ウィザードで適当に進めればできた。
+ただし、デフォルトシェルをBashに設定したら、デフォルトではBashが存在しないのでログインできなくなった。
+ルートアカウントは無事だったのでそこからBashを入れて復帰させた。
+
+やったこと
+===
+
+* インストール
+* パッケージの更新
+* bashを入れてmadpepperでログイン
+* SuperUserじゃないのを何とかする
+** rootでvisudo、madpepper ALL=(ALL) ALLでOK
+* USBメモリから.sshフォルダを持ってくる
+** BSDでのlsblk的なやつは"camcontrol devlist"
+** sudo mount -t msdosfs /dev/da0 tmpでOK
+*** ファイルシステム指定しないとInvalid argumentって言われる
+* gitのインストール、dotfilesを反映
+** 鍵は権限400
+** Gitcontribとかいうツール群があるらしい便利なものもあるらしい
+* dotfiles反映後なにかおかしい
+** コマンドのあとに-が入っちゃってる？
+** --colorsオプションが使えないっぽい
+*** どうしようかな
+** とか思ってたらなんか操作不能になった
+*** 履歴表示モードになってる？上下キーで表示履歴見れるけどコマンド入力モードにならない
+**** CTRL ALT DELで再起動しちゃったのでなんだったのかよくわかんない
+**** その後試してPus/brkを押してしまったとみられる
+** ほしい情報そのものがあった http://kaworu.jpn.org/freebsd/ls%E3%82%92%E3%82%AB%E3%83%A9%E3%83%BC%E8%A1%A8%E7%A4%BA%E3%81%AB%E3%81%99%E3%82%8B
+*** 今グヌーのls使った方式にしてるけど、標準ls方式のほうが汎用性ありそう
+**** OSXでも動くことを確認、Githubでも更新
+* gitのコミット時にvimがないと怒られた
+** パスが違うっぽかった
+*** lvコマンドがない、と言われたりもする
+**** おそらくgitのソース自体がLinuxベースになってるからだと思われる
+**** manでもlvないって言われたからpkgでいれた
+* git add *がうまく行かなかった？
+** git commit -aは動く
+* whichコマンドよく忘れる
+* rootで入れないようにする
+** /etc/passwd のrootのコンソールを/usr/sbin/nologinに変更
+** /etc/securettyを作成、中身は空
+*** Linuxでは使えるけど、BSDで使えるかは不明
+**** manページみたら使えなさそう
+** /etc/login.confを書き換える必要がある？
+*** 書き換えてもだめ
+** もしかしてTrueOSはルートログイン前提なのか！？気持ち悪い
+** chshでログインシェルを/usr/sbin/nologinにしたら弾けた
+** /etc/login.accessをいじったりもしたけどだめっぽい
+* shutdownでシェルのパスを打ち込めとか言われる
+** 設定もとに戻してもだめっぽい、というかこれはopenrcでendするときに何かエラーが出てるっぽい
+*** shutdown -r nowだとなぜか大丈夫
+* ZFSのインポートはできた
+
+
+FreeBSDのほうがよいのではないか
+===
+
+TrueOSはFreeBSDのパッケージを取ってきてるので、そっちのほうがいいのではないか
+というかpc-updatemanagerが気持ち悪い
+更新も頻繁にありそう
+shutdown now で落とせないのも気にかかる
+
+FreeBSDを入れてみる（やったこと）
+===
+
+* sudoを入れる
+* wheelユーザをsudoerに、/usr/local/etc/sudoers
+* gitを入れる
+* git clone dotfiles.git
+* bash、tmux、lvを入れる
+* lvをlnでリンク貼る
+* rootログイン禁止
+** とりあえずchshで/usr/sbin/nologinを指定
+*** /etc/login.accessで-:root:consoleも指定したけど、TrueOSでは効果なかった
+* Shutdown nowで落ちない問題は依然ある
+* rc.confにifconfig_em0="inet 192.168.100.101 netmask 255.255.255.0 broadcast 192.168.100.255"でStaticIPに変更、Resolve.confはDHCPで取得したやつが入ってたのでそのまま
+* docker入れる
+* /etc/ntp.confをntp.nict.jpに変更
+* resolve.confにDNSサーバが書いてあるのに名前解決できない
+** rc.confにdefaultrouter=192.168.123.100の追記が必要
+* 備忘、geom disk list詳しいディスク一覧、camcontrol devlist簡易なディスク一覧
+* mkdir -pで再帰的作成
+* /env/以下にsudoerファイルのリンクを貼ろうとした
+** 相対パスをリンク先に指定してしまってエラー
+** lnのリンク先を誤ってしまう→sudoができなくなる→rootログインもできない→再インストール／(^o^)＼
+* shutdownで落ちない問題はshutdownコマンドの使い方が間違ってた
+** shutdown -pで電源OFFらしい
+* Dockerはpkg docker-freebsdで入れる
+** Docker用のZFSストレージも必要zfs create -o mountpoint=/usr/docker zroot/docker
+** そのあとsysrc -f /etc/rc.conf docker_enable="YES"で起動時有効
+** service docker startで開始
+
+ここまでやってLinux向けのDockerイメージがちゃんと動かないことに気づく
+===
+
+dperson/sambaを動かしてみたけど動かない…
+[source,shell]
+-----
+linux: pid **** (busybox): syscall ioprio_set not implemented
+-----
+BSDのDockerはExperimentalらしいのでやむなしか…
+やっぱりLinuxのほうがいいかなー
+    Linux:  ZFSがFUSEだけど、動くし、Dockerの資産がつかえる
+    BSD:    ZFSはネイティブだけど、Dockerがまともに動かない
+→LinuxだなDistrowatchで探す限りArchLinuxが良さげ
+結局昔使ってたディストロに戻るのか
+
+ArchLinuxをインストールしてみる
+===
+
+* pacstrapなつかしー
+* 以前はインストールスクリプトあった気がするけどいつの間にかなくなってた
+* インストール難しい
+** GRUBのインストールとネットワーク設定でハマる
+*** GRUB grub-install --force /dev/sdx
+**** force入れないと実行されない、実行後にGRUBイメージのセクタ位置が変わる可能性があるかららしい
+*** GRUB grub-mkconfig -o /boot/grub/grub.cfg
+**** これないとGRUBが立ち上がってもOSが立ち上げられない
+*** ネットワークはdhcpcdで設定した
+**** /etc/dhcocd.confはもともといろいろ記載してあるが、いちどすべて消さないと自分が追記した箇所が動作しなかった
+
+* Partedで1GBのEFI System Partition をFat32、Bootフラグで作った
+** Rootも作った、フォーマットもした
+* /mnt 以下にマウント
+* timedatectl で時刻設定
+** 意味ないような気もする
+* pacstrap base
+* genfstab -U /mnt >> /mnt/etc/fstab
+* arch-chroot /mnt
+* ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+* hwclock --systohc --utc
+* /etc/hostname と /etc/hosts にホスト名
+* systemd-networkd で固定IP
+* pacman -Syu grub efibootmgr 
+** なんかうまくいかない
+

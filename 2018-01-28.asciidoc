@@ -167,3 +167,58 @@ ArchLinuxをインストールしてみる
 * pacman -Syu grub efibootmgr 
 ** なんかうまくいかない
 
+気を取り直してArchをインストール
+===
+
+* パーティション
+** 1:UEFI GRUB用EFI System Partition(ESP) - 512MB
+*** gdiskパーティションタイプEF00、またはPartedでは名前をEFI Systrem＆bootフラグ＆espフラグ
+*** Fat32でフォーマット、/bootでマウント
+** 2:SWAP - 8G
+*** 物理が8Gあるから必要ないかも（パフォーマンスが落ちるとか書いてあった気もする）
+*** mkswap→swapon
+** 3:/(root) - 残り
+*** ext4でフォーマット/でマウント
+* ping archlinux.jp
+* timedatectl
+** set-ntp true
+** set-timezone Asia/Tokyo
+*** いらないかも
+* pacman
+** vi /etc/pacman/mirrorlistでJPをトップに
+* pacstrap
+** /mnt base grub git openssh docker vim sudo
+* genfstab -U /mnt >> /mnt/etc/fstab
+* resolveconf
+** DNSのコピーをしておく
+* arch-chroot /mnt
+* ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+* hwclock --systohc --utc
+* /etc/locale.gen
+** en_USを有効に
+** locale-gen
+* echo LANG=en_US.UTF-8 > /etc/locale.conf
+* ホスト名関連
+** echo heteropoda > /etc/hostname
+** /etc/hosts
+*** 127.0.0.1 localhost.localdomain localhost
+*** ::1 localhost.localdomain localhost
+*** 127.0.1.1 heteropoda.localdomain heteropoda
+* ネットワークは後回し
+* mkinitpio -p linux
+* passwd
+* GRUB efibootmgr
+* archzfsリポジトリの追加
+** /etc/pacman.confにarchzfsサーバーを追記
+** pacman-key -r キー、pacman-key -f キー、pacman-key --lsign キー
+** pacman -Sy zfs-dkms
+* useradd madpepper
+** mkdir /home/madpepper
+** passwd madpepper
+** usermod -G wheel madpepper
+* vi /etc/sudoers
+** %wheel ALL=(ALL)ALL
+* bootctl --path=/boot install
+* sudo passwd -l root
+
+

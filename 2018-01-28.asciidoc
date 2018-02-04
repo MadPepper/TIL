@@ -1,8 +1,7 @@
-PC-BSDあらためTrueOSのインストール
-===
+== PC-BSDあらためTrueOSのインストール
 
-経緯
-====
+
+=== 経緯
 
 Ubuntu環境だったサーバーの設定ファイルをbitbucketにあげようと思ったら余分なファイルを上げそうになったので、
 [source, shell]
@@ -17,8 +16,7 @@ INPORTANT: *教訓：GITのハードリセットは要注意である*
 再インストールもUbuntuにしようかと思ったが、せっかく自分の好きにできるサーバーなのだから、面白そうなOSを使いたくなった。
 そこで、白羽の矢がたったのが「TrueOS」だった。
 
-TrueOSについて
-====
+=== TrueOSについて
 
 TrueOSはかつてはPC-BSDと呼ばれたユーザフレンドリなBSDのOS。
 BSD系はZFSをFUSEではなく直接扱えるので今回の用途では勝手が良い。
@@ -28,15 +26,13 @@ Dockerもインストールできるようなので、良さそう。
 ↑違うっぽい、パッケージインストールだけど、アップデートはpc-updatemanager使えって言ってるみたい？なんか面倒、というか気持ち悪い
 Free-BSDベースだから更新頻度とか大丈夫そう？
 
-インストール
-====
+=== インストール
 
 ウィザードで適当に進めればできた。
 ただし、デフォルトシェルをBashに設定したら、デフォルトではBashが存在しないのでログインできなくなった。
 ルートアカウントは無事だったのでそこからBashを入れて復帰させた。
 
-やったこと
-===
+== やったこと
 
 * インストール
 * パッケージの更新
@@ -85,16 +81,14 @@ Free-BSDベースだから更新頻度とか大丈夫そう？
 * ZFSのインポートはできた
 
 
-FreeBSDのほうがよいのではないか
-===
+== FreeBSDのほうがよいのではないか
 
 TrueOSはFreeBSDのパッケージを取ってきてるので、そっちのほうがいいのではないか
 というかpc-updatemanagerが気持ち悪い
 更新も頻繁にありそう
 shutdown now で落とせないのも気にかかる
 
-FreeBSDを入れてみる（やったこと）
-===
+== FreeBSDを入れてみる（やったこと）
 
 * sudoを入れる
 * wheelユーザをsudoerに、/usr/local/etc/sudoers
@@ -123,8 +117,7 @@ FreeBSDを入れてみる（やったこと）
 ** そのあとsysrc -f /etc/rc.conf docker_enable="YES"で起動時有効
 ** service docker startで開始
 
-ここまでやってLinux向けのDockerイメージがちゃんと動かないことに気づく
-===
+=== ここまでやってLinux向けのDockerイメージがちゃんと動かないことに気づく
 
 dperson/sambaを動かしてみたけど動かない…
 [source,shell]
@@ -138,8 +131,7 @@ BSDのDockerはExperimentalらしいのでやむなしか…
 →LinuxだなDistrowatchで探す限りArchLinuxが良さげ
 結局昔使ってたディストロに戻るのか
 
-ArchLinuxをインストールしてみる
-===
+== ArchLinuxをインストールしてみる
 
 * pacstrapなつかしー
 * 以前はインストールスクリプトあった気がするけどいつの間にかなくなってた
@@ -167,8 +159,7 @@ ArchLinuxをインストールしてみる
 * pacman -Syu grub efibootmgr 
 ** なんかうまくいかない
 
-気を取り直してArchをインストール
-===
+== 気を取り直してArchをインストール
 
 * パーティション
 ** 1:UEFI GRUB用EFI System Partition(ESP) - 512MB
@@ -229,8 +220,7 @@ ArchLinuxをインストールしてみる
 * systemctl enable zfs.target zfs-import-cache zfs-mount zfs-import.target
 ** zpool set cachefile=/etc/zfs/zpool.cache warehouse
 
-ネットワーク
-===
+=== ネットワーク
 * systemd-networkdを使ったがはまった
 * 何故か存在しないIPからもPingが返ってくる
 ** 192.168.123.xxxのローカルネットワークのIPはすべてPingが返ってくる
@@ -247,16 +237,14 @@ ArchLinuxをインストールしてみる
 ** /etc/systemd/networkd/wired.networkの[Match]オプションにおいてName=と記述すべきところをname=としたため全ネットワークに対して設定が入ってしまったことが原因
 *** スペルミス確認してたけど[Match]の部分は見てなかった
 
-ZFS
-===
+=== ZFS
 * カーネルアップデート絡みの問題を回避したくてDKMS版をつかった
 ** modprobeがうまく入らない
 ** まあカーネルアップデート同時にzfsも更新されるでしょ…
 * systemctl enable zfs.target zfs-import-cache zfs-mount zfs-import.target
 * # zpool set cachefile=/etc/zfs/zpool.cache <pool>
 
-Docker
-===
+=== Docker
 * 概ねBitbucketにあげてある
 ** ただし再起動するとDockerデーモンが立ち上がらなくなるバグが発生中
 *** rtorrent-flood以外だと大丈夫

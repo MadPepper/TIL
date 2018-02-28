@@ -1,0 +1,15 @@
+=== tmuxでときの流れを感じる
+
+* mber of queries per day is limited to 1000
+** アクセス制限あったかー
+
+=== Dockerデーモン問題
+
+* Buildしただけでデーモンが死ぬようになる
+** Buildになにか問題がある
+*** たしかにBuildが一発で通らず、2回目でとおるようになる
+**** Step 19/24 : COPY rtorrent.rc /home/torrent/.rtorrent.rc
+     failed to export image: failed to create image: failed to get layer sha256:69be8c229f74be0c14e5ce5fa2e77818799b2891978222cca98e8bdefd6b2c32: layer does not exist
+* Dockerに関する問題をArchlinuxで解決することは困難だと判断した
+** Ubuntuに移行しよう
+

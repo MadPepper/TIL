@@ -1,0 +1,26 @@
+== ラズパイにUbuntu入れる
+
+初期設定はbitbucketに
+* linux-firmwareのインストールでラズパイのlinux-firwareとコンフリクト
+** こんなメッセージ見るの久々
+*** dpkg-reconfigureで必要ソースを入れ替えるとかいうアンサーがreditにあったけど、取りざたして必要なさそうなので現状未インストール状態で保持
+* Nodejsが古い
+** n Packageを導入してv8.9.4を入れる
+
+heteropodaもそうだけどレポジトリ変えないと
+Motororaルータ「あーんもうルーティングがフットーしちゃいそーだよー！！」
+
+== 色々考え直してRaspbianを導入する
+
+* 言語Config、Keymap、Timezone、Hostname、アカウント、Wifi設定などは記録に残らない
+** raspi-config でウィザードに従うだけなので気にしないことにする
+* recfsusb2nがrootアクセスじゃないとだめ
+** デバイスアクセスがrootのみのため
+*** udevでデバイスアクセスを変える
+* apt をjaistにする
+* pm2とmirakurun入れる
+** どっちも一度強制終了しないとインストール終わらなかった
+*** 原因不明
+* その後なんやかんやして一度録画できたのに動かなくなる
+** Mirakurun で Connection refused
+*** よくわからない

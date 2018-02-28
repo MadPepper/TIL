@@ -37,4 +37,11 @@
 *** でもなぜ？
 **** 保存パスとか気に食わないこともあるけど取り急ぎこれで急場凌ぎ
 
+=== Archlinux on Raspberry Pi
+
+ArchlinuxがRaspberry pi でも動くらしいので試す
+大方針としてRaspberry PiではDockerは使わない（Chinachuの動きがよくわからないため）
+
+* OSXでのパーティション切りは面倒なのでLinuxでやってしまったほうがいいというStackExchangeのスレッドが…
+** ちょうどSDカードリーダが来るのでそれを使う
 

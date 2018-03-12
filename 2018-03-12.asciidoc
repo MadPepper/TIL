@@ -5,13 +5,19 @@
 * ただし表示がおかしいかもしれない
 ** 取り消し線ができない？
 *** [.line-through]#test#
+*** 文法が間違ってるだけ？
 
-[.line-through]#取り消し線#
+== Head First C
 
-#cassia cinnamon#
+* 1章完了
+** 基礎文法のおさらい
+*** エクササイズで少し間違ったりしてすこし恥ずかしい
 
-[.small]#small#
+== Understanding Computation
 
-[.underline]#underline#
-
-[.big]#big#
+* 1章完了
+** Rubyの基礎文法
+*** オブジェクト指向は知ってたけどブロックパラメータとかは初めて知った
+*** Yeild、Enumerable、Structについても身につけておきたい
+*** Symbol、Hash、Array、Range、などのデータ型も初めて学ぶ
+** 折に触れて復習したほうがよさそう

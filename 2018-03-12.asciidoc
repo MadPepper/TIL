@@ -4,4 +4,14 @@
 * コミットもできる
 * ただし表示がおかしいかもしれない
 ** 取り消し線ができない？
-*** [line-through]#test#
+*** [.line-through]#test#
+
+[.line-through]#取り消し線#
+
+#cassia cinnamon#
+
+[.small]#small#
+
+[.underline]#underline#
+
+[.big]#big#

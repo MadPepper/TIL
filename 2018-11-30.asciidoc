@@ -1,0 +1,57 @@
+= ホームネットワーク構築
+
+== iptables
+
+* ようやく動くようになった？
+** とりあえず内部ネットワークから名前解決できるようになった。
+* 今ってどこにNSが設定されてるんだろう
+** Ubuntuの内部DNSにくるまれててわからない
+*** `/etc/resolvconf/resolv.conf.d/base` に書き込んで `resolvconf -u` すると更新できるらしい
+**** 1.1.1.1が登録されたままになってる
+**** `resolveconf -u` しても消えない
+***** `/etc/systemd/resolved.conf` に直にDNS書き込んでた
+
+== dnsmasq
+
+* iptablesが一段落したらDNSがきちんと解決できてないことがわかった
+** 192.168.234.121に問い合わせても帰ってこない
+** 1.1.1.1に問い合わせると帰ってくる
+* 現在のUbuntuではdnsmasqじゃなくてsystemd-resolvになってる
+** それに従ってローカルでDNSする専用の動作に変わってるっぽい
+* Systemdにいろいろさせるほうが良さそう？
+** [systemd-networkd に仮想 bridge を作成させる方法 - memo](https://u7fa9.org/memo/HEAD/archives/2015-07/2015-07-08.rst)
+* そもそもdnsmasq立ち上がってない
+** top -p `pgrep -d ',' "java|tomcat|redis|mysql|mongo"`
+** dnsmasq.serviceがないので多分マスカレードできてない
+** `dhclient -r eth0` で開放できない
+*** いま持ってるDNSでとってきたIPは一体いつどうやってとったんだ？
+**** 単純にLeaseしてIPが無くなっただけだった
+** つなぎ直すとDNSでIpが振られた
+*** 一体だれがIPを振っているのか…
+**** DHCPD.confだ！思い出した！
+**** そうか！dhcpcdでマスカレードすればいいのか！
+***** 多分だめ
+***** dhcpcd=DHCPを振る、dnsmasq=DHCPを振る＋"ファイアウォールの対内側にDNSを提供できる。"[Dnsmasq - Wikipedia](https://ja.wikipedia.org/wiki/Dnsmasq)
+*** もはやBINDをDockerで上げてDHCPと一緒に放り込むほうがいいのでは
+**** 最終的にBIND立てることが視野に入ってるのでBIND立てる
+**** Netplanで固定IP振ることは変わらないけど、dhcpcdは止める、iptablesはそのまま
+**** Docker内部は全く別のネットワークなので、注意が必要
+***** 外部<-->BIND<-->？
+**** そもそもサブドメインの運用ってどうするんだ？
+**** いろいろわからないー
+
+
+== Systemd
+
+* 現在のTarget一覧
+** systemctl list-units --type target
+
+= その他
+
+* VSCodeのSSH FSめっちゃ便利
+** サーバー上のファイルをいつものエディタで変更できる
+** コマンド叩くのとはシームレスにはならないかも
+** vimのほうがきれいにハイライトできる？
+** コード編集はVSCodeのほうがいいだろうけど、ちょっとした編集はVimのほうがよさそう
+* zcat、そんなもんあるのか
+** gzの中身をテキスト表示できる

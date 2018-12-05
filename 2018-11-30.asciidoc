@@ -39,12 +39,50 @@
 ***** 外部<-->BIND<-->？
 **** そもそもサブドメインの運用ってどうするんだ？
 **** いろいろわからないー
-
-
-== Systemd
+* とりあえずDNSは挫折、PholcidaeはDHCPでとってきたやつ、Sparassidaeは1.1.1.1を直打ち
 
 * 現在のTarget一覧
 ** systemctl list-units --type target
+
+= ZFSのディスクアレイからエラーが帰ってくる
+
+* HDDが逝ったかもしれん
+* `/dev/disk/by-path/` で `ls -a` するとマップ先がわかる
+* smarttestにも1台引っかかる
+* バックアップしようとしたらデータがない！？
+** やばい
+** マウントされてなかっただけだった、マウントしたらちゃんとあった
+*** すでにルートに存在していたディレクトリはなんだったのか…
+
+---
+    [ 20:41:44 04/12/2018 madpepper ] ~ 
+$ sudo zpool status -v
+[sudo] password for madpepper: 
+  pool: warehouse
+ state: DEGRADED
+status: One or more devices could not be used because the label is missing or
+	invalid.  Sufficient replicas exist for the pool to continue
+	functioning in a degraded state.
+action: Replace the device using 'zpool replace'.
+   see: http://zfsonlinux.org/msg/ZFS-8000-4J
+  scan: resilvered 124M in 0h2m with 0 errors on Sat Dec  1 02:27:07 2018
+config:
+
+	NAME                                                STATE     READ WRITE CKSUM
+	warehouse                                           DEGRADED     0     0     0
+	  raidz2-0                                          DEGRADED     0     0     0
+	    9961331460964934652                             UNAVAIL      0     0     0  was /dev/disk/by-id/ata-ST3000DM001-1CH166_Z1F0VJQP-part1
+	    ata-ST3000DM001-1CH166_Z1F13Q5Q-part1           ONLINE       0     0     0
+	    ata-ST3000DM001-1ER166_Z502DLMK-part1           ONLINE       0     0     0
+	    ata-WDC_WD40EZRZ-00GXCB0_WD-WCC7K6AC39D5-part1  ONLINE       0     0     0
+	    ata-ST3000DM008-2DM166_Z5032B21-part1           ONLINE       0     0     0
+	    ata-ST3000DM008-2DM166_Z503JQGW-part1           ONLINE       0     0     0
+	    ata-ST3000DM008-2DM166_Z504NYEH-part1           ONLINE       0     0     0
+	    ata-ST3000DM008-2DM166_Z504P2FN-part1           ONLINE       0     0     0
+
+errors: No known data errors
+---
+
 
 = その他
 

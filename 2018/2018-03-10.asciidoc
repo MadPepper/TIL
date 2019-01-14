@@ -1,0 +1,6 @@
+== Chinachu
+
+* ユーザ権限を変更しないとエラーになる
+** conf/*  data/*  recored/*  の3つ
+*** recordedに作られたファイルから判断するにchinachuからはユーザ1001、グループsudo
+**** それならOKっぽい

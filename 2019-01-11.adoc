@@ -1,0 +1,29 @@
+= ホームネットワーク構築
+
+== iptables
+
+* とりあえず形になった？
+** Pholcidae<-->Sparassidae間は早いのにPholcidae<-->Planexルータ間は遅いし遅延も大きい
+*** なぜ？
+**** ルータ再起動したら治った
+**** 結局安物ルータってタコだよねって話か…
+# iptables -t nat -A PREROUTING -m tcp -p tcp
+ --dst 192.168.1.30
+  --dport 1234 -j DNAT
+   --to-destination 10.0.2.50:80
+
+# iptables -t nat -A POSTROUTING -m tcp -p tcp
+ --dst 10.0.2.50
+  --dport 80 -j SNAT
+   --to-source 10.0.2.40
+
+[root@example ~]# iptables -t nat -A POSTROUTING -s 0.0.0.0/0.0.0.0 -d 192.168.1.0/24 -j MASQUERADE
+[root@example ~]# iptables -t nat -A PREROUTING -s 0.0.0.0/0.0.0.0 -d 192.168.1.0/24 -p tcp --dport 80 -j DNAT --to 192.168.1.2:8080
+
+** ポートが勝手に空いてて！？ってなったけどどうやらPritunlのDockerイメージにNET_ADMIINが付いてるのでそこからポート開けてるらしい
+*** Dockerこわい
+
+== BIND9
+
+* 後学のためにはやったほうが良いかもだけど、まずはポート分け＋iptablesで処理するのが良さそう
+* Dockerで捌くっていう手もある
